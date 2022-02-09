@@ -3,13 +3,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:image/image.dart' as img;
+import 'package:image/image.dart';
 import 'package:image_manipulation/app/modules/home/algorithms/naive_blur.dart';
 import 'package:image_manipulation/app/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
 
 class HomeController extends GetxController {
-
   Uint8List? get image => getImage();
   @override
   void onInit() {
@@ -28,9 +27,7 @@ class HomeController extends GetxController {
     if (isOriginalShowed) {
       return _originalImage;
     }
-    return (_imageImg == null)
-        ? null
-        : _image;
+    return (_imageImg == null) ? null : _image;
   }
 
   void changeStateOriginal(bool state) {
@@ -40,21 +37,20 @@ class HomeController extends GetxController {
 
   void pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    XFile? pickedImage =
-        await futureWithLoading(_picker.pickImage(source: ImageSource.gallery));
+    XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedImage == null) return;
-    File file = File(pickedImage.path);
-    _image = file.readAsBytesSync();
-    _imageImg = img.decodeImage(_image!);
-    _imageImg = img.copyResize(_imageImg!, height: 480);
-    _originalImage = Uint8List.fromList(img.encodeJpg(_imageImg!));
+    File imageFile = File(pickedImage.path);
+    Uint8List? _image = imageFile.readAsBytesSync();
+    Image? _imageImg = decodeImage(_image);
+    _imageImg = copyResize(_imageImg!, height: 480);
+    _originalImage = Uint8List.fromList(encodeJpg(_imageImg));
     update();
   }
 
   void onTapEdit() async {
     if (_imageImg == null) return;
     _imageImg = await futureWithLoading(compute(naiveBlur, _imageImg!));
-    _image = Uint8List.fromList(img.encodeJpg(_imageImg!));
+    _image = Uint8List.fromList(encodeJpg(_imageImg!));
     update();
   }
 
@@ -66,9 +62,14 @@ class HomeController extends GetxController {
   }
 
   /// staff
-  Uint8List? _image; /// Image to show in UI, it has been got from _imageImg
-  Uint8List? _originalImage; /// Original image to show in UI
-  img.Image? _imageImg; /// Image to edit
+  /// Image to show in UI, it has been got from _imageImg
+  Uint8List? _image;
+  /// Original image to show in UI  
+  Uint8List? _originalImage;
+
+  Image? _imageImg;
+
+  /// Image to edit
   bool isOriginalShowed = false;
   bool isProcessing = false;
 }
